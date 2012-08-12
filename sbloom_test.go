@@ -1,6 +1,8 @@
 package sbloom
 
 import (
+	"hash/crc64"
+	"hash/fnv"
 	"math/rand"
 	"testing"
 )
@@ -41,6 +43,34 @@ func BenchmarkGet(b *testing.B) {
 			get(x, i)
 		}
 		b.SetBytes(size * (1 << (elemSize - 3)))
+	}
+}
+
+func BenchmarkFnvHash(b *testing.B) {
+	const bytes = 1024
+	s := sHash{
+		ha:   fnv.New64(),
+		seed: make([]byte, 4),
+	}
+	dat := make([]byte, bytes)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		s.Hash(dat)
+		b.SetBytes(bytes)
+	}
+}
+
+func BenchmarkCrc64Hash(b *testing.B) {
+	const bytes = 1024
+	s := sHash{
+		ha:   crc64.New(crc64.MakeTable(crc64.ISO)),
+		seed: make([]byte, 4),
+	}
+	dat := make([]byte, bytes)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		s.Hash(dat)
+		b.SetBytes(bytes)
 	}
 }
 
