@@ -42,20 +42,15 @@ func TestFillSize(t *testing.T) {
 
 /*
 === RUN TestFillSize
---- PASS: TestFillSize (2.43 seconds)
+--- PASS: TestFillSize (0.01 seconds)
 	fill_test.go:39: 2: 1.00 (1 1.00) std dev: 0.00
-	fill_test.go:39: 4: 2.32 (2 1.16) std dev: 0.66
-	fill_test.go:39: 8: 5.08 (4 1.27) std dev: 1.21
-	fill_test.go:39: 16: 10.58 (8 1.32) std dev: 1.96
-	fill_test.go:39: 32: 21.67 (16 1.35) std dev: 3.09
-	fill_test.go:39: 64: 43.77 (32 1.37) std dev: 4.32
-	fill_test.go:39: 128: 88.33 (64 1.38) std dev: 6.39
-	fill_test.go:39: 256: 176.93 (128 1.38) std dev: 9.03
-	fill_test.go:39: 512: 354.78 (256 1.39) std dev: 12.94
-	fill_test.go:39: 1024: 710.29 (512 1.39) std dev: 17.79
-	fill_test.go:39: 2048: 1419.28 (1024 1.39) std dev: 26.61
-	fill_test.go:39: 4096: 2837.60 (2048 1.39) std dev: 35.16
-	fill_test.go:39: 8192: 5677.99 (4096 1.39) std dev: 51.15
-	fill_test.go:39: 16384: 11355.13 (8192 1.39) std dev: 71.27
+	fill_test.go:39: 4: 2.32 (2 1.16) std dev: 0.58
+	fill_test.go:39: 8: 5.10 (4 1.27) std dev: 1.28
+	fill_test.go:39: 16: 10.49 (8 1.31) std dev: 2.10
+	fill_test.go:39: 32: 21.53 (16 1.35) std dev: 2.96
+	fill_test.go:39: 64: 45.41 (32 1.42) std dev: 4.96
+	fill_test.go:39: 128: 88.83 (64 1.39) std dev: 6.13
+	fill_test.go:39: 256: 178.09 (128 1.39) std dev: 8.72
+	fill_test.go:39: 512: 354.53 (256 1.38) std dev: 13.39
 PASS
 */

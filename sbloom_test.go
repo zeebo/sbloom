@@ -12,6 +12,14 @@ func randNum(top uint64) uint64 {
 
 const maxSize = 10
 
+var sizes []uint64
+
+func init() {
+	for i := uint(0); i < maxSize; i++ {
+		sizes = append(sizes, 1<<i)
+	}
+}
+
 func BenchmarkSet(b *testing.B) {
 	const size = 1 << maxSize
 	x := make([]uint8, size)
@@ -36,12 +44,47 @@ func BenchmarkGet(b *testing.B) {
 	}
 }
 
-func TestSetAll(t *testing.T) {
-	sizes := []uint64{}
-	for i := uint(0); i < maxSize; i++ {
-		sizes = append(sizes, 1<<i)
+func TestOneItem(t *testing.T) {
+	x := make([]uint8, 1)
+	for j := uint64(0); j < 1<<elemSize; j++ {
+		if get(x, j) {
+			t.Errorf("0[%d] %08b", j, x[0])
+		}
+	}
+	for i := uint64(0); i < 1<<elemSize; i++ {
+		set(x, i)
+		t.Logf("%08b", x[0])
+		for j := uint64(0); j < 1<<elemSize; j++ {
+			if get(x, j) != (j <= i) { //get is true when j <= i
+				t.Errorf("%d[%d] %08b", i, j, x[0])
+			}
+		}
+	}
+}
+
+func TestPanicGetLarge(t *testing.T) {
+	recov := func() {
+		if recover() == nil {
+			t.Fatal("no panic")
+		}
 	}
 
+	for _, size := range sizes {
+		func() {
+			defer recov()
+			x := make([]uint8, size)
+			get(x, size*(1<<elemSize))
+		}()
+
+		func() {
+			defer recov()
+			x := make([]uint8, size)
+			set(x, size*(1<<elemSize))
+		}()
+	}
+}
+
+func TestSetAll(t *testing.T) {
 	for _, size := range sizes {
 		x := make([]uint8, size)
 		for i := uint64(0); i < size*(1<<elemSize); i++ {
@@ -56,11 +99,6 @@ func TestSetAll(t *testing.T) {
 }
 
 func TestSetRandom(t *testing.T) {
-	sizes := []uint64{}
-	for i := uint(0); i < maxSize; i++ {
-		sizes = append(sizes, 1<<i)
-	}
-
 	for _, size := range sizes {
 		x := make([]uint8, size)
 
@@ -78,11 +116,6 @@ func TestSetRandom(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	sizes := []uint64{}
-	for i := uint(0); i < maxSize; i++ {
-		sizes = append(sizes, 1<<i)
-	}
-
 	for _, size := range sizes {
 		x := make([]uint8, size)
 		for i := range x {
@@ -97,12 +130,7 @@ func TestGetAll(t *testing.T) {
 	}
 }
 
-func TestGetRandom(t *testing.T) {
-	sizes := []uint64{}
-	for i := uint(0); i < maxSize; i++ {
-		sizes = append(sizes, 1<<i)
-	}
-
+func TestSetAndGetRandom(t *testing.T) {
 	for _, size := range sizes {
 		x := make([]uint8, size)
 
