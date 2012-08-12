@@ -8,7 +8,7 @@ import (
 
 func TestFillSize(t *testing.T) {
 	sizes := []int{}
-	for i := uint(1); i < maxSize*2; i++ {
+	for i := uint(1); i < maxSize; i++ {
 		sizes = append(sizes, 1<<i)
 	}
 

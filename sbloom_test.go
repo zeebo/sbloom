@@ -5,21 +5,50 @@ import (
 	"testing"
 )
 
+func randNum(top uint64) uint64 {
+	hi, low := rand.Uint32(), rand.Uint32()
+	return (uint64(hi)<<32 | uint64(low)) % top
+}
+
 const maxSize = 10
 
+func BenchmarkSet(b *testing.B) {
+	const size = 1 << maxSize
+	x := make([]uint8, size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for i := uint64(0); i < size*(1<<elemSize); i++ {
+			set(x, i)
+		}
+		b.SetBytes(size * (1 << (elemSize - 3)))
+	}
+}
+
+func BenchmarkGet(b *testing.B) {
+	const size = 1 << maxSize
+	x := make([]uint8, size)
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		for i := uint64(0); i < size*(1<<elemSize); i++ {
+			get(x, i)
+		}
+		b.SetBytes(size * (1 << (elemSize - 3)))
+	}
+}
+
 func TestSetAll(t *testing.T) {
-	sizes := []int{}
+	sizes := []uint64{}
 	for i := uint(0); i < maxSize; i++ {
 		sizes = append(sizes, 1<<i)
 	}
 
 	for _, size := range sizes {
-		x := make([]byte, size)
-		for i := 0; i < size*8; i++ {
-			set(x, uint32(i))
+		x := make([]uint8, size)
+		for i := uint64(0); i < size*(1<<elemSize); i++ {
+			set(x, i)
 		}
 		for i, xi := range x {
-			if xi != 255 {
+			if xi != 1<<(1<<elemSize)-1 {
 				t.Errorf("%d: %b", i, xi)
 			}
 		}
@@ -27,20 +56,20 @@ func TestSetAll(t *testing.T) {
 }
 
 func TestSetRandom(t *testing.T) {
-	sizes := []int{}
+	sizes := []uint64{}
 	for i := uint(0); i < maxSize; i++ {
 		sizes = append(sizes, 1<<i)
 	}
 
 	for _, size := range sizes {
-		x := make([]byte, size)
+		x := make([]uint8, size)
 
 		//set 10 random bytes
 		for i := 0; i < 10; i++ {
-			idx := rand.Uint32() % uint32(size*8)
+			idx := randNum(size * (1 << elemSize))
 			set(x, idx)
 			//make sure that byte is > 0
-			n := idx >> 3
+			n := idx >> elemSize
 			if xi := x[n]; xi == 0 {
 				t.Errorf("%d: %b", n, xi)
 			}
@@ -49,19 +78,19 @@ func TestSetRandom(t *testing.T) {
 }
 
 func TestGetAll(t *testing.T) {
-	sizes := []int{}
+	sizes := []uint64{}
 	for i := uint(0); i < maxSize; i++ {
 		sizes = append(sizes, 1<<i)
 	}
 
 	for _, size := range sizes {
-		x := make([]byte, size)
+		x := make([]uint8, size)
 		for i := range x {
-			x[i] = 255
+			x[i] = 1<<(1<<elemSize) - 1
 		}
 
-		for i := 0; i < size*8; i++ {
-			if !get(x, uint32(i)) {
+		for i := uint64(0); i < size*(1<<elemSize); i++ {
+			if !get(x, i) {
 				t.Errorf("%d", i)
 			}
 		}
@@ -69,17 +98,17 @@ func TestGetAll(t *testing.T) {
 }
 
 func TestGetRandom(t *testing.T) {
-	sizes := []int{}
+	sizes := []uint64{}
 	for i := uint(0); i < maxSize; i++ {
 		sizes = append(sizes, 1<<i)
 	}
 
 	for _, size := range sizes {
-		x := make([]byte, size)
+		x := make([]uint8, size)
 
 		//set 10 random bytes
 		for i := 0; i < 10; i++ {
-			idx := rand.Uint32() % uint32(size*8)
+			idx := randNum(size * (1 << elemSize))
 			set(x, idx)
 			if !get(x, idx) {
 				t.Errorf("%d", i)
