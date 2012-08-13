@@ -47,7 +47,7 @@ func TestNoFalseNegatives(t *testing.T) {
 	}
 
 	//while we're under half full
-	for f.left > 0 {
+	for f.Left > 0 {
 		item := randSeed()
 		f.Add(item, hashes)
 		if !f.Lookup(item, hashes) {
@@ -61,7 +61,7 @@ func TestOneBitSet(t *testing.T) {
 	f.Add(randSeed(), hashes)
 
 	//check each bin
-	for i, bin := range f.bins {
+	for i, bin := range f.Bins {
 
 		var ones int
 		for _, b := range bin {
@@ -73,7 +73,7 @@ func TestOneBitSet(t *testing.T) {
 		}
 
 		if ones > 1 {
-			for i, bin := range f.bins {
+			for i, bin := range f.Bins {
 				t.Logf("%d: %s", i, dumpBin(bin))
 			}
 			t.Fatalf("got %d bits set in bin %d", ones, i)
@@ -93,7 +93,7 @@ func testFalsePostive(t *testing.T, k int) {
 
 	//fill it halfway up
 	var items [][]byte
-	for f.left > 0 {
+	for f.Left > 0 {
 		item := randSeed()
 		f.Add(item, hashes)
 		items = append(items, item)
@@ -122,7 +122,7 @@ func testFalsePostive(t *testing.T, k int) {
 
 	if found > 5 {
 		t.Errorf("[%d] %d out of %d false positives", k, found, iters)
-		for i, bin := range f.bins {
+		for i, bin := range f.Bins {
 			t.Logf("[%d] %d: %s", k, i, dumpBin(bin))
 		}
 	}

@@ -31,9 +31,9 @@ func NewSizedFilter(h hash.Hash64, k int, log uint) *Filter {
 //when looked up.
 func (f *Filter) Add(p []byte) {
 	last := f.fs[len(f.fs)-1]
-	last.Add(p, f.hs[:last.k])
-	if last.left == 0 {
-		f.addNewFilter(last.log+1, last.k+1)
+	last.Add(p, f.hs[:last.K])
+	if last.Left == 0 {
+		f.addNewFilter(last.Log+1, last.K+1)
 	}
 }
 
@@ -53,7 +53,7 @@ func (f *Filter) addNewFilter(log uint, k int) {
 //the set of bytes has definitely not been seen before.
 func (f *Filter) Lookup(p []byte) bool {
 	for _, subfil := range f.fs {
-		if subfil.Lookup(p, f.hs[:subfil.k]) {
+		if subfil.Lookup(p, f.hs[:subfil.K]) {
 			return true
 		}
 	}

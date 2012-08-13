@@ -10,8 +10,8 @@ func TestFnv64SeededIndependence(t *testing.T) {
 	s1 := []byte{207, 248, 106, 26, 230, 204, 133, 85, 32, 173}
 	s2 := []byte{88, 43, 139, 185, 188, 106, 169, 227, 193, 190}
 
-	h1 := sHash{ha: fnv.New64(), seed: s1}
-	h2 := sHash{ha: fnv.New64(), seed: s2}
+	h1 := sHash{Ha: fnv.New64(), Seed: s1}
+	h2 := sHash{Ha: fnv.New64(), Seed: s2}
 
 	const log = 5
 

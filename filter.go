@@ -3,10 +3,10 @@ package sbloom
 import "fmt"
 
 type filter struct {
-	log  uint // size == 1 << log
-	k    int
-	bins [][]uint8 // [k][1<<size]uint8 bins
-	left uint64    // number of additions left until new filter
+	Log  uint // size == 1 << log
+	K    int
+	Bins [][]uint8 // [k][1<<size]uint8 bins
+	Left uint64    // number of additions left until new filter
 }
 
 //newFilter returns a new bloom filter of the specified bitsize and given mask
@@ -24,10 +24,10 @@ func newFilter(log uint, k int) (f *filter) {
 	}
 
 	return &filter{
-		log:  log,
-		bins: bins,
-		k:    k,
-		left: uint64(k) * (1 << (log - 1)),
+		Log:  log,
+		Bins: bins,
+		K:    k,
+		Left: uint64(k) * (1 << (log - 1)),
 	}
 }
 
@@ -51,18 +51,18 @@ func get(m []uint8, n uint64) bool {
 
 func (f *filter) Add(p []byte, hs []sHash) {
 	for i, h := range hs {
-		val := mix(h.Hash(p), f.log)
-		if f.left > 0 && !get(f.bins[i], val) {
-			f.left--
+		val := mix(h.Hash(p), f.Log)
+		if f.Left > 0 && !get(f.Bins[i], val) {
+			f.Left--
 		}
-		set(f.bins[i], val)
+		set(f.Bins[i], val)
 	}
 }
 
 func (f *filter) Lookup(p []byte, hs []sHash) bool {
 	for i, h := range hs {
-		val := mix(h.Hash(p), f.log)
-		if !get(f.bins[i], val) {
+		val := mix(h.Hash(p), f.Log)
+		if !get(f.Bins[i], val) {
 			return false
 		}
 	}

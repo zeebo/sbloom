@@ -7,13 +7,13 @@ import (
 
 //sHash is a hash with an initial seed.
 type sHash struct {
-	ha   hash.Hash64
-	seed []byte
+	Ha   hash.Hash64
+	Seed []byte
 }
 
 func newsHash(ha hash.Hash64) (s sHash) {
-	s.ha = ha
-	s.seed = randSeed()
+	s.Ha = ha
+	s.Seed = randSeed()
 	return
 }
 
@@ -25,8 +25,8 @@ func randSeed() (p []byte) {
 }
 
 func (s sHash) Hash(p []byte) uint64 {
-	s.ha.Reset()
-	s.ha.Write(s.seed)
-	s.ha.Write(p)
-	return s.ha.Sum64()
+	s.Ha.Reset()
+	s.Ha.Write(s.Seed)
+	s.Ha.Write(p)
+	return s.Ha.Sum64()
 }

@@ -48,10 +48,7 @@ func BenchmarkGet(b *testing.B) {
 
 func BenchmarkFnvHash(b *testing.B) {
 	const bytes = 1024
-	s := sHash{
-		ha:   fnv.New64(),
-		seed: make([]byte, 4),
-	}
+	s := newsHash(fnv.New64())
 	dat := make([]byte, bytes)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -62,10 +59,7 @@ func BenchmarkFnvHash(b *testing.B) {
 
 func BenchmarkCrc64Hash(b *testing.B) {
 	const bytes = 1024
-	s := sHash{
-		ha:   crc64.New(crc64.MakeTable(crc64.ISO)),
-		seed: make([]byte, 4),
-	}
+	s := newsHash(crc64.New(crc64.MakeTable(crc64.ISO)))
 	dat := make([]byte, bytes)
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
