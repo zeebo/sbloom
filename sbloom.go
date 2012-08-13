@@ -1,45 +1,56 @@
 package sbloom
 
-import (
-	"hash"
-	"math/rand"
-)
+import "hash"
 
-const (
-	elemSize = 3
-	idxShift = elemSize
-	idxMask  = 1<<elemSize - 1
-)
-
-//set turns the nth bit in the slice of bytes to one.
-func set(m []uint8, n uint64) {
-	idx, mask := n>>idxShift, n&idxMask
-	m[idx] |= 1 << mask
-}
-
-//get returns true if the nth bit in the slice of bytes is one.
-func get(m []uint8, n uint64) bool {
-	idx, mask := n>>idxShift, n&idxMask
-	return m[idx]&(1<<mask) != 0
-}
-
+//Filter represents a scalable bloom filter.
 type Filter struct {
 	bh hash.Hash64
 	fs []*filter
 	hs []sHash
 }
 
+//NewFilter returns a scalable bloom filter with a false negative probaility
+//less than 1/2**k. It starts with a default size of 1024 bits per k. If you
+//know you will use more/less than that, use NewSizedFilter for a better hint.
+//It uses the provided hash to operate.
+func NewFilter(h hash.Hash64, k int) *Filter {
+	return NewSizedFilter(h, k, 10)
+}
+
+//NewSizedFilter returns a scalable bloom filter with a false negative
+//probability less than 1/2**k. It start with a default size of 2**log bits per
+//k. It uses the provided hash to operate.
+func NewSizedFilter(h hash.Hash64, k int, log uint) *Filter {
+	f := new(Filter)
+	f.bh = h
+	f.addNewFilter(log, k)
+	return f
+}
+
+//Add adds the slice of bytes to the filter so that it will always return true
+//when looked up.
 func (f *Filter) Add(p []byte) {
 	last := f.fs[len(f.fs)-1]
 	last.Add(p, f.hs[:last.k])
 	if last.left == 0 {
-		newSize := last.size << 1
-		newMask := last.mask<<1 + 1
-		newK := last.k + 1
-		f.addNewFilter(newSize, newMask, newK)
+		f.addNewFilter(last.log+1, last.k+1)
 	}
 }
 
+//addNewFilter creates a new filter of the given size and number of bins, making
+//sure we have enough hash functions for the bins.
+func (f *Filter) addNewFilter(log uint, k int) {
+	//make sure we have up to k hashes
+	for len(f.hs) < k {
+		f.hs = append(f.hs, newsHash(f.bh))
+	}
+
+	//add the new bloom filter
+	f.fs = append(f.fs, newFilter(log, k))
+}
+
+//Lookup looks for the set of bytes in the bloom filter. If it returns false,
+//the set of bytes has definitely not been seen before.
 func (f *Filter) Lookup(p []byte) bool {
 	for _, subfil := range f.fs {
 		if subfil.Lookup(p, f.hs[:subfil.k]) {
@@ -47,63 +58,4 @@ func (f *Filter) Lookup(p []byte) bool {
 		}
 	}
 	return false
-}
-
-func (f *Filter) addNewFilter(size, mask uint64, k int) {
-	bins := make([][]uint8, k+1) //allocate one more bin
-	binSize := size >> elemSize  //size of each bin to have size bits
-	for i := range bins {
-		bins[i] = make([]uint8, binSize)
-	}
-
-	//make sure we have up to k hashes
-	for len(f.hs) < k {
-		f.hs = append(f.hs, sHash{
-			ha:   f.bh,
-			seed: randSeed(),
-		})
-	}
-
-	//add the new bloom filter
-	f.fs = append(f.fs, &filter{
-		size: size,
-		mask: mask,
-		bins: bins,
-		k:    k,
-		left: size / 5 * 7,
-	})
-}
-
-func randSeed() (p []byte) {
-	for i := 0; i < 4; i++ {
-		p = append(p, byte(rand.Intn(256)))
-	}
-	return
-}
-
-type filter struct {
-	size uint64 // N == 1 << size
-	mask uint64 // x % N == x & mask == x & (1 << size) - 1
-
-	k    int
-	bins [][]uint8 // [k][1<<size]uint8 bins
-	left uint64    // number of additions left until new filter
-}
-
-func (f *filter) Add(p []byte, hs []sHash) {
-	for i, h := range hs {
-		val := h.Hash(p)
-		set(f.bins[i], val&f.mask)
-	}
-	f.left--
-}
-
-func (f *filter) Lookup(p []byte, hs []sHash) bool {
-	for i, h := range hs {
-		val := h.Hash(p)
-		if !get(f.bins[i], val&f.mask) {
-			return false
-		}
-	}
-	return true
 }
