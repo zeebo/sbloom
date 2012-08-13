@@ -27,7 +27,7 @@ func newFilter(log uint, k int) (f *filter) {
 		log:  log,
 		bins: bins,
 		k:    k,
-		left: size / 10 * 7, //N/2 * 1.4. 1.4 found empirically in fill_test.go
+		left: uint64(k) * (1 << (log - 1)),
 	}
 }
 
@@ -52,9 +52,11 @@ func get(m []uint8, n uint64) bool {
 func (f *filter) Add(p []byte, hs []sHash) {
 	for i, h := range hs {
 		val := mix(h.Hash(p), f.log)
+		if f.left > 0 && !get(f.bins[i], val) {
+			f.left--
+		}
 		set(f.bins[i], val)
 	}
-	f.left--
 }
 
 func (f *filter) Lookup(p []byte, hs []sHash) bool {

@@ -92,7 +92,7 @@ func testFalsePostive(t *testing.T, k int) {
 	f, hashes := newTestFilter(k, 5)
 
 	//fill it halfway up
-	items := make([][]byte, 0, f.left)
+	var items [][]byte
 	for f.left > 0 {
 		item := randSeed()
 		f.Add(item, hashes)
