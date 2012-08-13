@@ -50,5 +50,4 @@ func TestGobFunctionalEqual(t *testing.T) {
 			t.Errorf("differed on %v", p)
 		}
 	}
-
 }
