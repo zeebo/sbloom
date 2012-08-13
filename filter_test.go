@@ -83,7 +83,7 @@ func TestOneBitSet(t *testing.T) {
 }
 
 func TestFalsePositiveRate(t *testing.T) {
-	for k := 1; k <= 17; k++ {
+	for k := 1; k <= 16; k++ {
 		testFalsePostive(t, k)
 	}
 }

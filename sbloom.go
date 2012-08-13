@@ -23,7 +23,7 @@ func NewFilter(h hash.Hash64, k int) *Filter {
 func NewSizedFilter(h hash.Hash64, k int, log uint) *Filter {
 	f := new(Filter)
 	f.bh = h
-	f.addNewFilter(log, k)
+	f.addNewFilter(log, k+1) //need to start at 1/2 to converge up
 	return f
 }
 
