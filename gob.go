@@ -16,16 +16,23 @@ func init() {
 //gobFilter is an internal type that gob will use to represent a Filter.
 type gobFilter struct {
 	Hash    hash.Hash64
-	Hashes  []sHash
+	Seeds   [][]byte
 	Filters []*filter
 }
 
 //GobEncode returns the gob marshalled value of the filter.
 func (f *Filter) GobEncode() (p []byte, err error) {
+	if f.bh == nil {
+		err = errors.New("no hash function specified")
+	}
+
 	gf := gobFilter{
 		Hash:    f.bh,
-		Hashes:  f.hs,
 		Filters: f.fs,
+		Seeds:   make([][]byte, 0, len(f.hs)),
+	}
+	for _, sh := range f.hs {
+		gf.Seeds = append(gf.Seeds, sh.Seed)
 	}
 	var buf bytes.Buffer
 	err = gob.NewEncoder(&buf).Encode(gf)
@@ -44,13 +51,22 @@ func (f *Filter) GobDecode(p []byte) (err error) {
 		return
 	}
 
-	if len(gf.Hashes) == 0 {
+	if gf.Hash == nil {
 		err = errors.New("no hash function specified")
 		return
 	}
 
+	//create the hashes from the seeds
+	f.hs = make([]sHash, 0, len(gf.Seeds))
+	for _, s := range gf.Seeds {
+		f.hs = append(f.hs, sHash{
+			Ha:   gf.Hash,
+			Seed: s,
+		})
+	}
+
+	//set the other fields
 	f.bh = gf.Hash
-	f.hs = gf.Hashes
 	f.fs = gf.Filters
 	return
 }
