@@ -9,7 +9,7 @@ type Filter struct {
 	hs []sHash
 }
 
-//NewFilter returns a scalable bloom filter with a false negative probaility
+//NewFilter returns a scalable bloom filter with a false positive probaility
 //less than 1/2**k. It starts with a default size of 1024 bits per k. If you
 //know you will use more/less than that, use NewSizedFilter for a better hint.
 //It uses the provided hash to operate.
@@ -17,7 +17,7 @@ func NewFilter(h hash.Hash64, k int) *Filter {
 	return NewSizedFilter(h, k, 10)
 }
 
-//NewSizedFilter returns a scalable bloom filter with a false negative
+//NewSizedFilter returns a scalable bloom filter with a false positive
 //probability less than 1/2**k. It start with a default size of 2**log bits per
 //k. It uses the provided hash to operate.
 func NewSizedFilter(h hash.Hash64, k int, log uint) *Filter {
