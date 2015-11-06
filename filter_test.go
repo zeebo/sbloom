@@ -43,7 +43,7 @@ func TestNoFalseNegatives(t *testing.T) {
 	f, hashes := newTestFilter(8, 10)
 
 	if p := randSeed(); f.Lookup(p, hashes) {
-		t.Fatal("false positive on zero: %v", p)
+		t.Fatalf("false positive on zero: %v", p)
 	}
 
 	//while we're under half full
@@ -51,7 +51,7 @@ func TestNoFalseNegatives(t *testing.T) {
 		item := randSeed()
 		f.Add(item, hashes)
 		if !f.Lookup(item, hashes) {
-			t.Fatal("false negative: %v", item)
+			t.Fatalf("false negative: %v", item)
 		}
 	}
 }
